@@ -84,7 +84,7 @@ class RootActivity : AppCompatActivity() {
         btn_like.setOnClickListener { viewModel.handleLike() }
         btn_bookmark.setOnClickListener { viewModel.handleBookmark() }
         btn_share.setOnClickListener { viewModel.handleShare() }
-        btn_settings.setOnClickListener { viewModel.handleSetting() }
+        btn_settings.setOnClickListener { viewModel.handleToggleMenu() }
     }
 
     private fun renderUi(data: ArticleState) {
