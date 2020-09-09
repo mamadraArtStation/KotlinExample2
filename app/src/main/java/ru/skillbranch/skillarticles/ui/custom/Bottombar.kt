@@ -9,11 +9,12 @@ import ru.skillbranch.skillarticles.R
 
 class Bottombar @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+    attrs: AttributeSet,
+    defStyleAtr: Int = 0
+) : ConstraintLayout(context, attrs, defStyleAtr) {
     init {
         View.inflate(context, R.layout.layout_bottombar, this)
+        //add material bg for handle elevation and color surface
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
         materialBg.elevation = elevation
         background = materialBg

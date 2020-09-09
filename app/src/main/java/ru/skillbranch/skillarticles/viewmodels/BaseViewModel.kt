@@ -2,9 +2,11 @@ package ru.skillbranch.skillarticles.viewmodels
 
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+
 import androidx.lifecycle.*
 
 abstract class BaseViewModel<T>(initState: T) : ViewModel() {
+
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val notifications = MutableLiveData<Event<Notify>>()
 
@@ -21,10 +23,8 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
     /***
      * getter для получения not null значения текущего состояния ViewModel
      */
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    val currentState
+    protected val currentState
         get() = state.value!!
-
 
     /***
      * лямбда выражение принимает в качестве аргумента текущее состояние и возвращает
@@ -46,12 +46,10 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
         notifications.value = Event(content)
     }
 
-    /***
-     * более компактная форма записи observe() метода LiveData принимает последним аргумент лямбда
-     * выражение обрабатывающее изменение текущего стостояния
-     */
-    fun observeState(owner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
-        state.observe(owner, Observer { onChanged(it!!) })
+    //более компактная запись observe
+    //принимает последим аргументом лямбду, обрабатывающую изменение текущего состояния
+    fun observeState(lifecycleOwner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
+        state.observe(lifecycleOwner, Observer { onChanged(it!!) })
     }
 
     /***
@@ -67,6 +65,8 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
      * функция принимает источник данных и лямбда выражение обрабатывающее поступающие данные источника
      * лямбда принимает новые данные и текущее состояние ViewModel в качестве аргументов,
      * изменяет его и возвращает модифицированное состояние, которое устанавливается как текущее
+     *
+     * newValue данные из источника, currentState - текущее состояние. вернет или модифицированный state или null
      */
     protected fun <S> subscribeOnDataSource(
         source: LiveData<S>,
@@ -77,24 +77,21 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
         }
     }
 
-}
-
-@Suppress("UNCHECKED_CAST")
-class ViewModelFactory(private val params: String) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ArticleViewModel::class.java)) {
-            return ArticleViewModel(params) as T
+    class ViewModelFactory(private val params: String) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(ArticleViewModel::class.java)) {
+                return ArticleViewModel(params) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
+
 }
 
 class Event<out E>(private val content: E) {
     var hasBeenHandled = false
 
-    /***
-     * возвращает контент который еще не был обработан иначе null
-     */
+    //возвращает контент который еще не был обработан иначе null
     fun getContentIfNotHandled(): E? {
         return if (hasBeenHandled) null
         else {
@@ -111,23 +108,24 @@ class Event<out E>(private val content: E) {
  * необработанное ранее событие получаемое в реализации метода Observer`a onChanged
  */
 class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Observer<Event<E>> {
-
+    //если есть необработанное событие (контент) передай в качестве аргумента в лямбду
+    // onEventUnhandledContent
     override fun onChanged(event: Event<E>?) {
-        //если есть необработанное событие (контент) передай в качестве аргумента в лямбду
-        // onEventUnhandledContent
         event?.getContentIfNotHandled()?.let {
             onEventUnhandledContent(it)
         }
     }
 }
 
+//sealed class похожи на enum, только могут хранить какое-то состояние
 sealed class Notify(val message: String) {
+    //data class поддверживает наследование ТОЛЬКО внутри sealed class
     data class TextMessage(val msg: String) : Notify(msg)
 
     data class ActionMessage(
         val msg: String,
         val actionLabel: String,
-        val actionHandler: (() -> Unit)?
+        val actionHandler: (() -> Unit)
     ) : Notify(msg)
 
     data class ErrorMessage(
