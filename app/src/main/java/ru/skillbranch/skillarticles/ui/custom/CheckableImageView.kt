@@ -4,14 +4,13 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Checkable
-import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageButton
 
-class CheсkableImageView @JvmOverloads constructor(
+class CheckableImageView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet,
-    defStyleAtr: Int = 0
-) : ImageView(context, attrs, defStyleAtr), Checkable, View.OnClickListener {
-
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : AppCompatImageButton(context, attrs, defStyleAttr), Checkable, View.OnClickListener{
     private var checked = false
 
     companion object {
@@ -23,19 +22,19 @@ class CheсkableImageView @JvmOverloads constructor(
     }
 
     override fun onCreateDrawableState(extraSpace: Int): IntArray {
-        val drawableState = super.onCreateDrawableState(extraSpace + 1)
-        if (isChecked) View.mergeDrawableStates(drawableState, CHECKED_STATE_SET)
+        val drawableState =  super.onCreateDrawableState(extraSpace + 1)
+        if(isChecked) View.mergeDrawableStates(drawableState, CHECKED_STATE_SET)
         return drawableState
     }
 
-    override fun isChecked() = checked
+    override fun isChecked(): Boolean = checked
 
     override fun toggle() {
         isChecked = !checked
     }
 
     override fun setChecked(check: Boolean) {
-        if (checked == check) return
+        if(checked == check) return
         checked = check
         refreshDrawableState()
     }
@@ -43,4 +42,6 @@ class CheсkableImageView @JvmOverloads constructor(
     override fun onClick(v: View?) {
         toggle()
     }
+
+
 }

@@ -8,32 +8,23 @@ import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
 
-class ArticleViewModel(private val articleId: String) :
-    BaseViewModel<ArticleState>(ArticleState()), IArticleViewModel {
-
+class ArticleViewModel(private val articleId: String): BaseViewModel<ArticleState>(ArticleState()){
     private val repository = ArticleRepository
+    private var menuIsShown: Boolean = false
 
     init {
-        //subscribe on mutable data
-
-        //article - ArticleData даные из репо
-        //state - ArticleState текущий стейт ArticleViewModel
-        //2000ms delay
         subscribeOnDataSource(getArticleData()) { article, state ->
-            //получаем article, если он null выходим
-            //иначе меняем значения state
-            article ?: return@subscribeOnDataSource null
+            article ?: return@subscribeOnDataSource  null
             state.copy(
-                shareLink = article.shareLink,
+                shareLink =  article.shareLink,
                 title = article.title,
+                author = article.author,
                 category = article.category,
                 categoryIcon = article.categoryIcon,
-                author = article.author,
                 date = article.date.format()
             )
         }
 
-        //5000ms delay
         subscribeOnDataSource(getArticleContent()) { content, state ->
             content ?: return@subscribeOnDataSource null
             state.copy(
@@ -42,7 +33,6 @@ class ArticleViewModel(private val articleId: String) :
             )
         }
 
-        //1000ms delay
         subscribeOnDataSource(getArticlePersonalInfo()) { info, state ->
             info ?: return@subscribeOnDataSource null
             state.copy(
@@ -51,8 +41,6 @@ class ArticleViewModel(private val articleId: String) :
             )
         }
 
-        //вконченом итоге общий стейт состоит из нескольких разных испочников данных
-        //0ms delay
         subscribeOnDataSource(repository.getAppSettings()) { settings, state ->
             state.copy(
                 isDarkMode = settings.isDarkMode,
@@ -61,35 +49,43 @@ class ArticleViewModel(private val articleId: String) :
         }
     }
 
-    //load text from network
-    override fun getArticleContent(): LiveData<List<Any>?> {
+    private fun getArticleContent(): LiveData<List<Any>?> {
         return repository.loadArticleContent(articleId)
     }
 
-    //load data from db
-    override fun getArticleData(): LiveData<ArticleData?> {
+    private fun getArticleData(): LiveData<ArticleData?> {
         return repository.getArticle(articleId)
     }
 
-    //load data from db
-    override fun getArticlePersonalInfo(): LiveData<ArticlePersonalInfo?> {
+    private fun getArticlePersonalInfo(): LiveData<ArticlePersonalInfo?> {
         return repository.loadArticlePersonalInfo(articleId)
     }
 
-    override fun handleUpText() {
-        repository.updateSettings(currentState.toAppSettings().copy(isBigText = true))
-    }
-
-    override fun handleDownText() {
-        repository.updateSettings(currentState.toAppSettings().copy(isBigText = false))
-    }
-
-    override fun handleNightMode() {
+    fun handleNightMode() {
         val settings = currentState.toAppSettings()
         repository.updateSettings(settings.copy(isDarkMode = !settings.isDarkMode))
     }
 
-    override fun handleLike() {
+    fun handleUpText() {
+        repository.updateSettings(currentState.toAppSettings().copy(isBigText = true))
+    }
+
+    fun handleDownText() {
+        repository.updateSettings(currentState.toAppSettings().copy(isBigText = false))
+    }
+
+//    override fun handleBookmark() {
+    fun handleBookmark() {
+        val info = currentState.toArticlePersonalInfo()
+        repository.updateArticlePersonalInfo(info.copy(isBookmark = !info.isBookmark))
+
+        val msg = if(currentState.isBookmark) "Add to bookmarks" else "Remove from bookmarks"
+        notify(Notify.TextMessage(msg))
+    }
+
+//    override fun handleLike() {
+     fun handleLike() {
+        val isLiked = currentState.isLike
         val toggleLike = {
             val info = currentState.toArticlePersonalInfo()
             repository.updateArticlePersonalInfo(info.copy(isLike = !info.isLike))
@@ -97,48 +93,55 @@ class ArticleViewModel(private val articleId: String) :
 
         toggleLike()
 
-        val msg = if (currentState.isLike) Notify.TextMessage("Mark is liked")
-        else Notify.ActionMessage("Don`t like it anymore", "No, still like it", toggleLike)
-
+        val msg = if (!isLiked) Notify.TextMessage("Mark is liked")
+        else {
+            Notify.ActionMessage(
+                "Don`t like it anymore",
+                "No, still like it",
+                toggleLike
+            )
+        }
         notify(msg)
     }
 
-    override fun handleBookmark() {
-        val personalInfo = currentState.toArticlePersonalInfo()
-        repository.updateArticlePersonalInfo(personalInfo.copy(isBookmark = !personalInfo.isBookmark))
-
-        val msg = if (currentState.isBookmark) Notify.TextMessage("Add to bookmarks")
-        else Notify.TextMessage("Remove from bookmarks")
-
-        notify(msg)
+    fun handleToggleMenu() {
+        updateState { state -> state.copy(isShowMenu = !state.isShowMenu).also {
+            menuIsShown = !state.isShowMenu
+        } }
     }
 
-    override fun handleShare() {
+//    override fun handleShare() {
+    fun handleShare() {
         val msg = "Share is not implemented"
         notify(Notify.ErrorMessage(msg, "OK", null))
     }
 
-    override fun handleSearchMode(isSearch: Boolean) {
-
+    fun hideMenu() {
+        updateState { it.copy(isShowMenu = false) }
     }
 
-    override fun handleSearch(query: String?) {
-
+    fun showMenu() {
+        updateState { it.copy(isShowMenu = menuIsShown) }
     }
 
-    override fun handleToggleMenu() {
-        updateState { it.copy(isShowMenu = !it.isShowMenu) }
+    fun handleSearchQuery(query: String?) {
+        updateState { it.copy(searchQuery = query) }
     }
 
-    fun handleSearchQuery(newText: String?) {
-        updateState { it.copy(searchQuery = newText) }
+    fun getCurrentState() : ArticleState? {
+        return currentState
     }
+
+    fun handleIsSearch(isSearch: Boolean) {
+        updateState { it.copy(isSearch = isSearch) }
+    }
+
 }
 
 data class ArticleState(
     val isAuth: Boolean = false,
     val isLoadingContent: Boolean = true,
-    val isLoadingReview: Boolean = true,
+    val isLoadingReviews: Boolean = true,
     val isLike: Boolean = false,
     val isBookmark: Boolean = false,
     val isShowMenu: Boolean = false,
@@ -146,16 +149,15 @@ data class ArticleState(
     val isDarkMode: Boolean = false,
     val isSearch: Boolean = false,
     val searchQuery: String? = null,
-    val searchResult: List<Pair<Int, Int>> = emptyList(), //результаты поиска (стартовая и конечная позиции)
-    val searchPosition: Int = 0, //текущая позиция найденного результата
+    val searchResults: List<Pair<Int, Int>> = emptyList(),
+    val searchPosition: Int = 0,
     val shareLink: String? = null,
-    val title: String? = null, //заголовок статьи
+    val title: String? = null,
     val category: String? = null,
     val categoryIcon: Any? = null,
     val date: String? = null,
     val author: Any? = null,
-    val poster: String? = null, //обложка статьи
+    val poster: String? = null,
     val content: List<Any> = emptyList(),
     val reviews: List<Any> = emptyList()
-
 )

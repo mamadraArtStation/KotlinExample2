@@ -8,17 +8,18 @@ object ArticleRepository {
     private val network = NetworkDataHolder
 
     fun loadArticleContent(articleId: String): LiveData<List<Any>?> {
-        return network.loadArticleContent(articleId) //5s delay from network
+        return network.loadArticleContent(articleId)
     }
+
     fun getArticle(articleId: String): LiveData<ArticleData?> {
-        return local.findArticle(articleId) //2s delay from db
+        return local.findArticle(articleId)
     }
 
     fun loadArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
-        return local.findArticlePersonalInfo(articleId) //1s delay from db
+        return local.findArticlePersonalInfo(articleId)
     }
 
-    fun getAppSettings(): LiveData<AppSettings> = local.getAppSettings() //from preferences
+    fun getAppSettings(): LiveData<AppSettings> = local.getAppSettings()
     fun updateSettings(appSettings: AppSettings) {
         local.updateAppSettings(appSettings)
     }
