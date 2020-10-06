@@ -1,13 +1,16 @@
 package ru.skillbranch.skillarticles.ui.custom.behaviors
 
-import android.util.Log
+import android.content.Context
+import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.math.MathUtils
 import androidx.core.view.ViewCompat
 import ru.skillbranch.skillarticles.ui.custom.Bottombar
 
-class BottombarBehavior : CoordinatorLayout.Behavior<Bottombar>() {
+
+class BottombarBehavior() : CoordinatorLayout.Behavior<Bottombar>() {
+    constructor(context: Context, attrs: AttributeSet): this()
 
     override fun onStartNestedScroll(
         coordinatorLayout: CoordinatorLayout,
@@ -29,7 +32,10 @@ class BottombarBehavior : CoordinatorLayout.Behavior<Bottombar>() {
         consumed: IntArray,
         type: Int
     ) {
-        child.translationY = MathUtils.clamp(child.translationY + dy, 0f, child.minHeight.toFloat())
+        if(!child.isSearchMode){
+            val offset = MathUtils.clamp(child.translationY + dy, 0f, child.height.toFloat())
+            if (offset != child.translationY) child.translationY = offset
+        }
         super.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
     }
 }
