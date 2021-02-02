@@ -9,7 +9,7 @@ import ru.skillbranch.skillarticles.ui.custom.ArticleSubmenu
 import ru.skillbranch.skillarticles.ui.custom.Bottombar
 
 class SubmenuBehavior(): CoordinatorLayout.Behavior<ArticleSubmenu>() {
-    constructor(context: Context, attrs: AttributeSet): this()
+    constructor(contet: Context, attrs: AttributeSet): this()
 
     override fun layoutDependsOn(
         parent: CoordinatorLayout,
@@ -24,16 +24,15 @@ class SubmenuBehavior(): CoordinatorLayout.Behavior<ArticleSubmenu>() {
         child: ArticleSubmenu,
         dependency: View
     ): Boolean {
-        return if (child.isOpen && dependency.translationY >= 0f) {
+        return if(child.isOpen && dependency.translationY >= 0.0f) { // Если меню открыто - то по движению сдвигаем вправо
             animate(child, dependency)
             true
-        } else {
-            false
-        }
+        } else false
     }
 
     private fun animate(child: View, dependency: View) {
         val fraction = dependency.translationY / dependency.height
-        child.translationX = (child.width + child.marginRight) * fraction
+        child.translationX = ( child.width + child.marginRight) * fraction
     }
+
 }

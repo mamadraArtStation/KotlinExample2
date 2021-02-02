@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.RootActivity">
-
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
+        <!--
+        1) layout_scrollFlags = как взаимодействовать с nested скроллом внутри CoordinatorLayout (уходить
+        за границы экрана и скрываться там
+        2) Установим тему
+        3) Высота (Z-координата) elevation
+        -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
-            style="@style/ArticleToolbar"
+            android:theme="@style/ArticleBarsTheme"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:elevation="4dp"
-            android:theme="@style/ArticleBarsTheme"
-            app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
+            style="@style/ArticleToolbar"
             app:logo="@drawable/logo_placeholder"
+            app:title="@string/app_name"
             app:subtitle="loading..."
-            app:title="@string/app_name" />
+            app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
+            android:elevation="4dp"/>
 
     </com.google.android.material.appbar.AppBarLayout>
-
+<!--        layout_behavior - при скроллинге будет сворачивать appbar-->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
+<!--    Для взаимодействия с NestedScrollView для TextView выставим focusable и focusableInTouchMode=true
+saveenabled=false - чтобы не переполнить контент (не сохранять в бандл)
+-->
         <TextView
             android:id="@+id/tv_text_content"
             android:layout_width="wrap_content"
@@ -40,29 +47,37 @@
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:saveEnabled="false"
-            android:text="Loading..." />
+            android:text="Loading..."/>
 
     </androidx.core.widget.NestedScrollView>
 
+<!--    У которых выставлен insetEdget='bottom' - не могут замещаться dodgeInsetEdges="bottom"
+https://stackoverflow.com/questions/55234488/bottomnavigationview-hidden-by-default-after-adding-scroll-behaviour
+добавляем app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
+для прокрутки со скроллом
+-->
     <ru.skillbranch.skillarticles.ui.custom.ArticleSubmenu
         android:id="@+id/submenu"
+        android:theme="@style/ArticleBarsTheme"
         android:layout_width="200dp"
         android:layout_height="96dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="8dp"
+        android:layout_gravity="bottom|right"
+        android:elevation="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:theme="@style/ArticleBarsTheme"
-        android:visibility="gone"
         app:layout_dodgeInsetEdges="bottom"
-        tools:visibility="visible" />
+        android:visibility="gone"
+        tools:visibility="visible"        />
+<!--        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"-->
 
     <ru.skillbranch.skillarticles.ui.custom.Bottombar
         android:id="@+id/bottombar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:layout_gravity="bottom"
-        android:elevation="4dp"
         android:theme="@style/ArticleBarsTheme"
-        app:layout_insetEdge="bottom" />
+        android:elevation="4dp"
+        app:layout_insetEdge="bottom"/>
+<!--        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

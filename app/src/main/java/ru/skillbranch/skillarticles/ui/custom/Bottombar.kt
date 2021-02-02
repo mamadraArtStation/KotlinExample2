@@ -16,22 +16,24 @@ import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.ui.custom.behaviors.BottombarBehavior
 import kotlin.math.hypot
 
+// Custom-view + добавили кастомное поведение
 class Bottombar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
-    var isSearchMode = false
 
-    override fun getBehavior(): CoordinatorLayout.Behavior<Bottombar> {
-        return BottombarBehavior()
-    }
+    var isSearchMode = false
 
     init {
         View.inflate(context, R.layout.layout_bottombar, this)
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
-        materialBg.elevation = elevation
+        materialBg.elevation = elevation // передаем elevation нашей view
         background = materialBg
+    }
+
+    override fun getBehavior(): CoordinatorLayout.Behavior<Bottombar> {
+        return BottombarBehavior()
     }
 
     //save state
@@ -51,6 +53,7 @@ class Bottombar @JvmOverloads constructor(
         }
     }
 
+    // Проверка режима поиска и установка анимации
     fun setSearchState(search: Boolean) {
         if (isSearchMode == search || !isAttachedToWindow) return
         isSearchMode = search
@@ -86,12 +89,13 @@ class Bottombar @JvmOverloads constructor(
         va.start()
     }
 
+    // Количество найденных вхождений и текущая выделенная позиция
     fun bindSearchInfo(searchCount: Int = 0, position: Int = 0) {
         if (searchCount == 0) {
             tv_search_result.text = "Not found"
-            btn_result_up.isEnabled = false
+            btn_result_up.isEnabled = false // Не показываем кнопки перемещения по позициям
             btn_result_down.isEnabled = false
-        }else{
+        }else{ // Чтото нашли в поиске
             tv_search_result.text = "${position.inc()} of $searchCount"
             btn_result_up.isEnabled = true
             btn_result_down.isEnabled = true
@@ -104,6 +108,7 @@ class Bottombar @JvmOverloads constructor(
         }
     }
 
+    // Для сохранения состояния View
     private class SavedState : BaseSavedState, Parcelable {
         var ssIsSearchMode: Boolean = false
 

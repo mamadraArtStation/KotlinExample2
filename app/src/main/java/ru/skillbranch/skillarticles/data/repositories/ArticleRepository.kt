@@ -3,14 +3,14 @@ package ru.skillbranch.skillarticles.data.repositories
 import androidx.lifecycle.LiveData
 import ru.skillbranch.skillarticles.data.*
 
+// Singleton репозиторий - эмуляция получения данных
 object ArticleRepository {
     private val local = LocalDataHolder
     private val network = NetworkDataHolder
 
-    fun loadArticleContent(articleId: String): LiveData<List<Any>?> {
+    fun loadArticleContent(articleId: String): LiveData<String?> {
         return network.loadArticleContent(articleId) //5s delay from network
     }
-
     fun getArticle(articleId: String): LiveData<ArticleData?> {
         return local.findArticle(articleId) //2s delay from db
     }

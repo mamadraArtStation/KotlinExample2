@@ -22,6 +22,7 @@ class ArticleSubmenu @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
     var isOpen = false
+    // Координаты центра для ripple анимации
     private var centerX: Float = context.dpToPx(200)
     private var centerY: Float = context.dpToPx(96)
 
@@ -29,21 +30,18 @@ class ArticleSubmenu @JvmOverloads constructor(
         View.inflate(context, R.layout.layout_submenu, this)
         //add material bg for handle elevation and color surface
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
-        materialBg.elevation = elevation
+        materialBg.elevation = elevation // передаем elevation нашей view
         background = materialBg
     }
 
-    override fun getBehavior(): CoordinatorLayout.Behavior<*> {
-        return SubmenuBehavior()
-    }
-
-    fun open() {
+    fun open() { // Открытие submenu
         if (isOpen || !isAttachedToWindow) return
         isOpen = true
         animatedShow()
     }
 
-    fun close() {
+    fun close() { //
+        // Закрытие submenu
         if (!isOpen || !isAttachedToWindow) return
         isOpen = false
         animatedHide()
@@ -80,7 +78,7 @@ class ArticleSubmenu @JvmOverloads constructor(
     }
 
     //save state
-    override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable? { // Дополнительно закидываем состояние меню перед пересозданием активити
         val savedState = SavedState(super.onSaveInstanceState())
         savedState.ssIsOpen = isOpen
         return savedState
@@ -115,6 +113,10 @@ class ArticleSubmenu @JvmOverloads constructor(
             override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
         }
+    }
+
+    override fun getBehavior(): CoordinatorLayout.Behavior<ArticleSubmenu> {
+        return SubmenuBehavior()
     }
 
 }
