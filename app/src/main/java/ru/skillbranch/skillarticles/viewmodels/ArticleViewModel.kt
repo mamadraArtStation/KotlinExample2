@@ -135,7 +135,7 @@ class ArticleViewModel(private val articleId: String): BaseViewModel<ArticleStat
         val result = clearContent
             .indexesOf(query)
             .map{it to it + query.length}
-        updateState { it.copy(searchQuery = query, searchResults = result, searchPosition = 0) } // обновил
+        updateState { it.copy(searchQuery = query, searchResults = result, searchPosition = 0) }
     }
 
     fun handleUpResult() {

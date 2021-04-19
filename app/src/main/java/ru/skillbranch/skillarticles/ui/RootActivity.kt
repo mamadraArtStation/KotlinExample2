@@ -80,9 +80,6 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-
-        // Переведем скролл на самое первое вхождение
-        //renderSearchPosition(0)
     }
 
     override fun renderSearchPosition(searchPosition: Int) {
