@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.markdown.spans
+package ru.skillbranch.skillarticles.ui.custom.spans
 
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -40,13 +40,15 @@ class BlockquotesSpan(
         val oldColor = color
         val oldStyle = style
         val oldWidth = strokeWidth
+
         color = lineColor
-        style = Paint.Style.STROKE // просто линия
+        style = Paint.Style.STROKE
         strokeWidth = quoteWidth
+
         block()
-        // Восстановим старый цвет - чтобы bullet цветом не продолжил рисовать прочие элементы
-        strokeWidth = oldWidth
+
         color = oldColor
         style = oldStyle
+        strokeWidth = oldWidth
     }
 }

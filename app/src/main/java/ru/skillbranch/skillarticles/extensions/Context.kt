@@ -1,11 +1,14 @@
 package ru.skillbranch.skillarticles.extensions
 
+import android.app.Activity
 import android.content.Context
+import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.TypedValue
-import androidx.annotation.AttrRes
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 
 fun Context.dpToPx(dp: Int): Float {
     return TypedValue.applyDimension(
@@ -24,6 +27,20 @@ fun Context.dpToIntPx(dp: Int): Int {
     ).toInt()
 }
 
+fun Context.attrValue(resId: Int): Int {
+    val typedValue = TypedValue()
+    if (theme.resolveAttribute(resId, typedValue, true)) {
+        return typedValue.data
+    } else {
+        throw Resources.NotFoundException("Resource with id $resId not found")
+    }
+}
+
+fun Context.hideKeyboard(view: View) {
+    val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
 val Context.isNetworkAvailable: Boolean
     get() {
         val cm = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -38,8 +55,3 @@ val Context.isNetworkAvailable: Boolean
             cm.activeNetworkInfo?.run { isConnectedOrConnecting } ?: false
         }
     }
-
-fun Context.attrValue(@AttrRes attr: Int, typedValue: TypedValue = TypedValue()): Int {
-    theme.resolveAttribute(attr, typedValue, true)
-    return typedValue.data
-}

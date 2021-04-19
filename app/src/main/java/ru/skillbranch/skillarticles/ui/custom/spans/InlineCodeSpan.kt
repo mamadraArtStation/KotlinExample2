@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.markdown.spans
+package ru.skillbranch.skillarticles.ui.custom.spans
 
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -32,8 +32,8 @@ class InlineCodeSpan(
         fm: Paint.FontMetricsInt?
     ): Int {
         paint.forText {
-            val measureText = paint.measureText(text.toString(), start, end) // ширина текста
-            measureWidth = (measureText + 2*padding).toInt()
+            val measureText = paint.measureText(text.toString(), start, end)
+            measureWidth = (measureText + 2 * padding).toInt()
         }
         return measureWidth
     }
@@ -50,7 +50,7 @@ class InlineCodeSpan(
         paint: Paint
     ) {
         paint.forBackground {
-            rect.set(x, top.toFloat(),x + measureWidth, bottom.toFloat())
+            rect.set(x, top.toFloat(),x + measureWidth, y + paint.descent())
             canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
         }
 
@@ -71,20 +71,20 @@ class InlineCodeSpan(
 
         block()
 
-        // Восстановим старые настройки
-        color= oldColor
-        typeface = oldFont
+        color = oldColor
+        typeface= oldFont
         textSize = oldSize
     }
 
     private inline fun Paint.forBackground(block: () -> Unit) {
-        val oldStyle = style
         val oldColor = color
+        val oldStyle = style
 
         color = bgColor
         style = Paint.Style.FILL
+
         block()
-        // Восстановим старые настройки
+
         color = oldColor
         style = oldStyle
     }

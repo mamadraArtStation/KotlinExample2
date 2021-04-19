@@ -8,25 +8,27 @@ import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import ru.skillbranch.skillarticles.viewmodels.base.ViewModelDelegate
 
-// Вынесем сюда максимально возможное, чтобы разгрузить RootActivity
 abstract class BaseActivity<T: BaseViewModel<out IViewModelState>>: AppCompatActivity() {
     protected abstract val binding: Binding
     protected abstract val viewModel: T
     protected abstract val layout: Int
 
-    // set listeners + tuning views, будет переопределена в RootActivity
+    // set listeners, tuning views
     abstract fun setupViews()
     abstract fun renderNotification(notify: Notify)
-
-    internal inline fun <reified T: ViewModel> provideViewModel (arg : Any?) = ViewModelDelegate(T::class.java, arg)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layout)
         setupViews()
         binding.onFinishInflate()
-        viewModel.observeState(this) { binding.bind(it)}
-        viewModel.observeNotifications(this) {renderNotification(it)}
+        viewModel.observeState(this) { binding.bind(it) }
+        viewModel.observeNotifications(this) { renderNotification(it)}
+    }
+
+    // возвращает экземпляр делегата ViewModelDelegate
+    internal inline fun <reified T:ViewModel> provideViewModel(arg : Any?): ViewModelDelegate<T> {
+        return ViewModelDelegate(T::class.java, arg)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
